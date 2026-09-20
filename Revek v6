@@ -1,0 +1,867 @@
+--========================================================
+-- REVEK HUB v5
+-- Stable Mobile Dev/Admin Hub
+-- Roblox Studio / เกมของคุณเอง
+--========================================================
+
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local TeleportService = game:GetService("TeleportService")
+
+local LP = Players.LocalPlayer
+local PG = LP:WaitForChild("PlayerGui")
+
+--========================================================
+-- SETTINGS
+--========================================================
+
+local Speed = 16
+local Jump = 50
+
+local InfiniteJump = false
+local GodMode = false
+local NoStun = false
+local NoKnockback = false
+
+local Flying = false
+local FlySpeed = 60
+
+local UI_SMALL = false
+
+--========================================================
+-- CHARACTER
+--========================================================
+
+local function Character()
+	return LP.Character
+end
+
+local function Humanoid()
+	local c = Character()
+	return c and c:FindFirstChildOfClass("Humanoid")
+end
+
+local function Root()
+	local c = Character()
+	return c and c:FindFirstChild("HumanoidRootPart")
+end
+
+local function ApplyCharacter()
+	local h = Humanoid()
+	if not h then return end
+
+	h.WalkSpeed = Speed
+	h.JumpPower = Jump
+
+	h:SetAttribute("NoStun", NoStun)
+	h:SetAttribute("NoKnockback", NoKnockback)
+
+	if GodMode and h.Health > 0 then
+		h.Health = h.MaxHealth
+	end
+end
+
+LP.CharacterAdded:Connect(function()
+	task.wait(0.5)
+	ApplyCharacter()
+end)
+
+--========================================================
+-- OLD UI REMOVE
+--========================================================
+
+local Old = PG:FindFirstChild("RevekHubV5")
+if Old then
+	Old:Destroy()
+end
+
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "RevekHubV5"
+Gui.ResetOnSpawn = false
+Gui.IgnoreGuiInset = true
+Gui.DisplayOrder = 999
+Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+Gui.Parent = PG
+
+--========================================================
+-- MAIN
+--========================================================
+
+local Main = Instance.new("Frame")
+Main.Name = "Main"
+Main.AnchorPoint = Vector2.new(0.5,0.5)
+Main.Position = UDim2.fromScale(0.5,0.5)
+Main.Size = UDim2.new(0.92,0,0.80,0)
+Main.BackgroundColor3 = Color3.fromRGB(13,16,25)
+Main.BorderSizePixel = 0
+Main.Active = true
+Main.Parent = Gui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0,18)
+MainCorner.Parent = Main
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Color3.fromRGB(55,62,90)
+MainStroke.Thickness = 1
+MainStroke.Parent = Main
+
+--========================================================
+-- HEADER
+--========================================================
+
+local HeaderBar = Instance.new("Frame")
+HeaderBar.Size = UDim2.new(1,0,0,72)
+HeaderBar.BackgroundColor3 = Color3.fromRGB(17,20,31)
+HeaderBar.BorderSizePixel = 0
+HeaderBar.Active = true
+HeaderBar.Parent = Main
+
+local HeaderCorner = Instance.new("UICorner")
+HeaderCorner.CornerRadius = UDim.new(0,18)
+HeaderCorner.Parent = HeaderBar
+
+local Logo = Instance.new("TextLabel")
+Logo.Position = UDim2.fromOffset(16,13)
+Logo.Size = UDim2.fromOffset(48,48)
+Logo.BackgroundColor3 = Color3.fromRGB(105,45,235)
+Logo.Text = "R"
+Logo.TextColor3 = Color3.new(1,1,1)
+Logo.TextSize = 28
+Logo.Font = Enum.Font.GothamBold
+Logo.Parent = HeaderBar
+
+Instance.new("UICorner",Logo).CornerRadius = UDim.new(0,12)
+
+local Title = Instance.new("TextLabel")
+Title.Position = UDim2.fromOffset(76,9)
+Title.Size = UDim2.new(1,-145,0,32)
+Title.BackgroundTransparency = 1
+Title.Text = "REVEK HUB"
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.TextSize = 21
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = HeaderBar
+
+local Sub = Instance.new("TextLabel")
+Sub.Position = UDim2.fromOffset(77,38)
+Sub.Size = UDim2.new(1,-145,0,20)
+Sub.BackgroundTransparency = 1
+Sub.Text = "Dev / Admin Tool"
+Sub.TextColor3 = Color3.fromRGB(145,150,175)
+Sub.TextSize = 11
+Sub.Font = Enum.Font.Gotham
+Sub.TextXAlignment = Enum.TextXAlignment.Left
+Sub.Parent = HeaderBar
+
+local Close = Instance.new("TextButton")
+Close.Size = UDim2.fromOffset(48,48)
+Close.Position = UDim2.new(1,-60,0,12)
+Close.BackgroundColor3 = Color3.fromRGB(25,29,43)
+Close.Text = "×"
+Close.TextColor3 = Color3.fromRGB(235,240,255)
+Close.TextSize = 32
+Close.Font = Enum.Font.GothamMedium
+Close.AutoButtonColor = true
+Close.Active = true
+Close.Selectable = true
+Close.Parent = HeaderBar
+
+Instance.new("UICorner",Close).CornerRadius = UDim.new(0,12)
+
+--========================================================
+-- SIDE BAR
+--========================================================
+
+local Side = Instance.new("ScrollingFrame")
+Side.Position = UDim2.fromOffset(10,82)
+Side.Size = UDim2.new(0,145,1,-94)
+Side.BackgroundTransparency = 1
+Side.BorderSizePixel = 0
+Side.ScrollBarThickness = 2
+Side.AutomaticCanvasSize = Enum.AutomaticSize.Y
+Side.CanvasSize = UDim2.new()
+Side.Parent = Main
+
+local SideLayout = Instance.new("UIListLayout")
+SideLayout.Padding = UDim.new(0,5)
+SideLayout.Parent = Side
+
+local SidePadding = Instance.new("UIPadding")
+SidePadding.PaddingBottom = UDim.new(0,10)
+SidePadding.Parent = Side
+
+--========================================================
+-- CONTENT
+--========================================================
+
+local Content = Instance.new("ScrollingFrame")
+Content.Position = UDim2.fromOffset(163,82)
+Content.Size = UDim2.new(1,-173,1,-94)
+Content.BackgroundColor3 = Color3.fromRGB(18,22,34)
+Content.BorderSizePixel = 0
+Content.ScrollBarThickness = 4
+Content.AutomaticCanvasSize = Enum.AutomaticSize.Y
+Content.CanvasSize = UDim2.new()
+Content.ScrollingDirection = Enum.ScrollingDirection.Y
+Content.Parent = Main
+
+Instance.new("UICorner",Content).CornerRadius = UDim.new(0,15)
+
+local ContentLayout = Instance.new("UIListLayout")
+ContentLayout.Padding = UDim.new(0,7)
+ContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ContentLayout.Parent = Content
+
+local ContentPadding = Instance.new("UIPadding")
+ContentPadding.PaddingTop = UDim.new(0,10)
+ContentPadding.PaddingBottom = UDim.new(0,12)
+ContentPadding.PaddingLeft = UDim.new(0,10)
+ContentPadding.PaddingRight = UDim.new(0,10)
+ContentPadding.Parent = Content
+
+--========================================================
+-- HELPERS
+--========================================================
+
+local function ClearContent()
+	for _,v in ipairs(Content:GetChildren()) do
+		if not v:IsA("UIListLayout")
+		and not v:IsA("UIPadding") then
+			v:Destroy()
+		end
+	end
+	Content.CanvasPosition = Vector2.zero
+end
+
+local function HeaderText(text)
+	local L = Instance.new("TextLabel")
+	L.Size = UDim2.new(1,0,0,38)
+	L.BackgroundTransparency = 1
+	L.Text = text
+	L.TextColor3 = Color3.fromRGB(225,220,255)
+	L.TextSize = 19
+	L.Font = Enum.Font.GothamBold
+	L.TextXAlignment = Enum.TextXAlignment.Left
+	L.Parent = Content
+	return L
+end
+
+local function Button(text,callback)
+	local B = Instance.new("TextButton")
+
+	B.Size = UDim2.new(1,0,0,44)
+	B.BackgroundColor3 = Color3.fromRGB(27,32,47)
+	B.BorderSizePixel = 0
+	B.Text = text
+	B.TextColor3 = Color3.fromRGB(235,238,250)
+	B.TextSize = 14
+	B.Font = Enum.Font.GothamMedium
+	B.AutoButtonColor = true
+	B.Active = true
+	B.Selectable = true
+	B.Parent = Content
+
+	Instance.new("UICorner",B).CornerRadius = UDim.new(0,9)
+
+	B.Activated:Connect(function()
+		local ok,err = pcall(callback)
+		if not ok then
+			warn("[Revek]",err)
+		end
+	end)
+
+	return B
+end
+
+local function Category(name,icon,callback)
+	local B = Instance.new("TextButton")
+
+	B.Size = UDim2.new(1,-3,0,43)
+	B.BackgroundColor3 = Color3.fromRGB(22,28,43)
+	B.BorderSizePixel = 0
+	B.Text = icon.."  "..name
+	B.TextColor3 = Color3.fromRGB(220,225,245)
+	B.TextSize = 13
+	B.Font = Enum.Font.GothamMedium
+	B.TextXAlignment = Enum.TextXAlignment.Left
+	B.AutoButtonColor = true
+	B.Active = true
+	B.Selectable = true
+	B.Parent = Side
+
+	local P = Instance.new("UIPadding")
+	P.PaddingLeft = UDim.new(0,10)
+	P.Parent = B
+
+	Instance.new("UICorner",B).CornerRadius = UDim.new(0,9)
+
+	B.Activated:Connect(callback)
+
+	return B
+end
+
+--========================================================
+-- PLAYER
+--========================================================
+
+local function PlayerPage()
+	ClearContent()
+	HeaderText("👤  Player")
+
+	Button("⚡ Speed  -  "..Speed.."  +",function()
+		Speed = math.clamp(Speed + 10,1,1000)
+		ApplyCharacter()
+		PlayerPage()
+	end)
+
+	Button("⚡ Speed -10",function()
+		Speed = math.clamp(Speed - 10,1,1000)
+		ApplyCharacter()
+		PlayerPage()
+	end)
+
+	Button("🦘 Jump +10",function()
+		Jump = math.clamp(Jump + 10,1,1000)
+		ApplyCharacter()
+		PlayerPage()
+	end)
+
+	Button("♾️ Infinite Jump : "..(InfiniteJump and "ON" or "OFF"),function()
+		InfiniteJump = not InfiniteJump
+		PlayerPage()
+	end)
+
+	Button("❤️ Heal",function()
+		local h = Humanoid()
+		if h then h.Health = h.MaxHealth end
+	end)
+
+	Button("🔄 Respawn",function()
+		local h = Humanoid()
+		if h then h.Health = 0 end
+	end)
+end
+
+--========================================================
+-- MOVEMENT / FLY
+--========================================================
+
+local function MovementPage()
+	ClearContent()
+	HeaderText("🏃  Movement")
+
+	Button("✈️ Fly : "..(Flying and "ON" or "OFF"),function()
+		Flying = not Flying
+		if not Flying then
+			local r = Root()
+			if r then
+				r.AssemblyLinearVelocity = Vector3.zero
+			end
+		end
+		MovementPage()
+	end)
+
+	Button("🚀 Fly Speed +10  ("..FlySpeed..")",function()
+		FlySpeed = math.clamp(FlySpeed+10,10,500)
+		MovementPage()
+	end)
+
+	Button("🐢 Fly Speed -10",function()
+		FlySpeed = math.clamp(FlySpeed-10,10,500)
+		MovementPage()
+	end)
+
+	Button("💨 Dash",function()
+		local r = Root()
+		if r then
+			r.AssemblyLinearVelocity =
+				r.CFrame.LookVector * 100
+		end
+	end)
+
+	Button("➡️ Teleport Forward",function()
+		local r = Root()
+		if r then
+			r.CFrame = r.CFrame + r.CFrame.LookVector*25
+		end
+	end)
+
+	Button("⬆️ Up 20",function()
+		local r = Root()
+		if r then
+			r.CFrame = r.CFrame + Vector3.new(0,20,0)
+		end
+	end)
+
+	Button("⬇️ Down 20",function()
+		local r = Root()
+		if r then
+			r.CFrame = r.CFrame - Vector3.new(0,20,0)
+		end
+	end)
+end
+
+--========================================================
+-- COMBAT
+--========================================================
+
+local function CombatPage()
+	ClearContent()
+	HeaderText("⚔️  Combat / Test")
+
+	Button("🛡️ God Mode : "..(GodMode and "ON" or "OFF"),function()
+		GodMode = not GodMode
+		ApplyCharacter()
+		CombatPage()
+	end)
+
+	Button("🚫 No Stun : "..(NoStun and "ON" or "OFF"),function()
+		NoStun = not NoStun
+		ApplyCharacter()
+		CombatPage()
+	end)
+
+	Button("🚫 No Knockback : "..(NoKnockback and "ON" or "OFF"),function()
+		NoKnockback = not NoKnockback
+		ApplyCharacter()
+		CombatPage()
+	end)
+
+	Button("❤️ Full Heal",function()
+		local h = Humanoid()
+		if h then h.Health = h.MaxHealth end
+	end)
+end
+
+--========================================================
+-- TARGET
+--========================================================
+
+local function TargetPage()
+	ClearContent()
+	HeaderText("🎯  Target")
+
+	Button("🎯 Teleport Nearest Player",function()
+		local r = Root()
+		if not r then return end
+
+		local nearest
+		local dist = math.huge
+
+		for _,p in ipairs(Players:GetPlayers()) do
+			if p ~= LP and p.Character then
+				local pr = p.Character:FindFirstChild("HumanoidRootPart")
+				if pr then
+					local d = (pr.Position-r.Position).Magnitude
+					if d < dist then
+						dist = d
+						nearest = pr
+					end
+				end
+			end
+		end
+
+		if nearest then
+			r.CFrame = nearest.CFrame + Vector3.new(0,3,0)
+		end
+	end)
+
+	Button("👥 Player List",function()
+		for _,p in ipairs(Players:GetPlayers()) do
+			print(p.Name)
+		end
+	end)
+end
+
+--========================================================
+-- NPC
+--========================================================
+
+local function NPCPage()
+	ClearContent()
+	HeaderText("🤖  NPC")
+
+	Button("🔎 Scan NPC",function()
+		local n = 0
+
+		for _,v in ipairs(workspace:GetDescendants()) do
+			if v:IsA("Model") and v:FindFirstChildOfClass("Humanoid") then
+				n += 1
+			end
+		end
+
+		print("NPC / Humanoid Models:",n)
+	end)
+
+	Button("📍 Find Nearest NPC",function()
+		local r = Root()
+		if not r then return end
+
+		local nearest
+		local dist = math.huge
+
+		for _,v in ipairs(workspace:GetDescendants()) do
+			if v:IsA("Model") and v ~= Character() then
+				local h = v:FindFirstChildOfClass("Humanoid")
+				local pr = v:FindFirstChild("HumanoidRootPart")
+
+				if h and pr and h.Health > 0 then
+					local d = (pr.Position-r.Position).Magnitude
+					if d < dist then
+						dist = d
+						nearest = pr
+					end
+				end
+			end
+		end
+
+		if nearest then
+			r.CFrame = nearest.CFrame + Vector3.new(0,3,0)
+		end
+	end)
+end
+
+--========================================================
+-- MAP
+--========================================================
+
+local function MapPage()
+	ClearContent()
+	HeaderText("🗺️  Map")
+
+	Button("🔎 Map Scan",function()
+		print("Map objects:",#workspace:GetDescendants())
+	end)
+
+	Button("📍 Map Center",function()
+		local r = Root()
+		if not r then return end
+
+		local cf,size = workspace:GetBoundingBox()
+		r.CFrame = CFrame.new(
+			cf.Position + Vector3.new(0,size.Y/2+5,0)
+		)
+	end)
+
+	Button("🏁 Find Spawn",function()
+		local r = Root()
+		if not r then return end
+
+		for _,v in ipairs(workspace:GetDescendants()) do
+			if v:IsA("SpawnLocation") then
+				r.CFrame = v.CFrame + Vector3.new(0,4,0)
+				break
+			end
+		end
+	end)
+
+	Button("📦 Count Parts",function()
+		local n=0
+		for _,v in ipairs(workspace:GetDescendants()) do
+			if v:IsA("BasePart") then
+				n+=1
+			end
+		end
+		print("Parts:",n)
+	end)
+end
+
+--========================================================
+-- WORLD
+--========================================================
+
+local function WorldPage()
+	ClearContent()
+	HeaderText("🌎  World")
+
+	Button("☀️ Day",function()
+		Lighting.ClockTime = 14
+	end)
+
+	Button("🌙 Night",function()
+		Lighting.ClockTime = 0
+	end)
+
+	Button("💡 FullBright",function()
+		Lighting.Brightness = 3
+		Lighting.FogEnd = 100000
+	end)
+
+	Button("🌍 Normal Lighting",function()
+		Lighting.Brightness = 1
+		Lighting.FogEnd = 1000
+	end)
+
+	Button("🌙 Low Gravity",function()
+		workspace.Gravity = 50
+	end)
+
+	Button("🌍 Normal Gravity",function()
+		workspace.Gravity = 196.2
+	end)
+end
+
+--========================================================
+-- VEHICLE
+--========================================================
+
+local function VehiclePage()
+	ClearContent()
+	HeaderText("🚗  Vehicle")
+
+	Button("🔎 Scan Vehicles",function()
+		local n=0
+
+		for _,v in ipairs(workspace:GetDescendants()) do
+			if v:IsA("VehicleSeat") then
+				n+=1
+			end
+		end
+
+		print("Vehicle Seats:",n)
+	end)
+
+	Button("📍 Find Vehicle",function()
+		local r=Root()
+		if not r then return end
+
+		for _,v in ipairs(workspace:GetDescendants()) do
+			if v:IsA("VehicleSeat") then
+				r.CFrame=v.CFrame+Vector3.new(0,4,0)
+				break
+			end
+		end
+	end)
+end
+
+--========================================================
+-- ITEMS
+--========================================================
+
+local function ItemsPage()
+	ClearContent()
+	HeaderText("🎒  Items")
+
+	Button("🔎 Scan Items",function()
+		print("Items scanned")
+	end)
+
+	Button("📦 Scan Tools",function()
+		local n=0
+
+		for _,v in ipairs(workspace:GetDescendants()) do
+			if v:IsA("Tool") then
+				n+=1
+			end
+		end
+
+		print("Tools:",n)
+	end)
+end
+
+--========================================================
+-- SERVER
+--========================================================
+
+local function ServerPage()
+	ClearContent()
+	HeaderText("🖥️  Server")
+
+	Button("📊 Server Info",function()
+		print("Players:",#Players:GetPlayers())
+		print("PlaceId:",game.PlaceId)
+		print("JobId:",game.JobId)
+	end)
+
+	Button("👥 Player List",function()
+		for _,p in ipairs(Players:GetPlayers()) do
+			print(p.Name,p.UserId)
+		end
+	end)
+
+	Button("🔄 Rejoin",function()
+		TeleportService:Teleport(game.PlaceId,LP)
+	end)
+end
+
+--========================================================
+-- VISUAL
+--========================================================
+
+local Highlights = {}
+
+local function VisualPage()
+	ClearContent()
+	HeaderText("👁️  Visual")
+
+	Button("✨ Highlight Players",function()
+		for _,p in ipairs(Players:GetPlayers()) do
+			if p ~= LP and p.Character then
+				local h=Instance.new("Highlight")
+				h.Name="RevekHighlight"
+				h.FillTransparency=0.6
+				h.Parent=p.Character
+				table.insert(Highlights,h)
+			end
+		end
+	end)
+
+	Button("🧹 Clear Highlights",function()
+		for _,h in ipairs(Highlights) do
+			if h and h.Parent then
+				h:Destroy()
+			end
+		end
+		table.clear(Highlights)
+	end)
+end
+
+--========================================================
+-- UTILITY
+--========================================================
+
+local function UtilityPage()
+	ClearContent()
+	HeaderText("🔧  Utility")
+
+	Button("📍 Position",function()
+		local r=Root()
+		if r then
+			print("Position:",r.Position)
+		end
+	end)
+
+	Button("🏃 Velocity",function()
+		local r=Root()
+		if r then
+			print("Velocity:",r.AssemblyLinearVelocity)
+		end
+	end)
+
+	Button("🔄 Refresh Character",function()
+		ApplyCharacter()
+	end)
+
+	Button("🧹 Clear Console Test",function()
+		print("Revek Utility OK")
+	end)
+end
+
+--========================================================
+-- ADMIN
+--========================================================
+
+local function AdminPage()
+	ClearContent()
+	HeaderText("🛡️  Admin / Dev")
+
+	Button("🔧 Apply Character Settings",function()
+		ApplyCharacter()
+	end)
+
+	Button("❤️ Full Heal",function()
+		local h=Humanoid()
+		if h then h.Health=h.MaxHealth end
+	end)
+
+	Button("🔄 Reset Test State",function()
+		Speed=16
+		Jump=50
+		FlySpeed=60
+		InfiniteJump=false
+		GodMode=false
+		NoStun=false
+		NoKnockback=false
+		Flying=false
+		ApplyCharacter()
+		AdminPage()
+	end)
+end
+
+--========================================================
+-- SETTINGS
+--========================================================
+
+local function SettingsPage()
+	ClearContent()
+	HeaderText("⚙️  Settings")
+
+	Button("📐 UI Size : "..(UI_SMALL and "Small" or "Normal"),function()
+		UI_SMALL=not UI_SMALL
+		SettingsPage()
+	end)
+
+	Button("🔄 Reset UI Position",function()
+		Main.Position=UDim2.fromScale(0.5,0.5)
+	end)
+
+	Button("❌ Close Hub",function()
+		Main.Visible=false
+		OpenButton.Visible=true
+	end)
+end
+
+--========================================================
+-- SIDE MENU
+--========================================================
+
+Category("Player","👤",PlayerPage)
+Category("Movement","🏃",MovementPage)
+Category("Combat","⚔️",CombatPage)
+Category("Target","🎯",TargetPage)
+Category("NPC","🤖",NPCPage)
+Category("Map","🗺️",MapPage)
+Category("World","🌎",WorldPage)
+Category("Vehicle","🚗",VehiclePage)
+Category("Items","🎒",ItemsPage)
+Category("Server","🖥️",ServerPage)
+Category("Visual","👁️",VisualPage)
+Category("Utility","🔧",UtilityPage)
+Category("Admin","🛡️",AdminPage)
+Category("Settings","⚙️",SettingsPage)
+
+--========================================================
+-- OPEN BUTTON
+--========================================================
+
+local OpenButton=Instance.new("TextButton")
+OpenButton.Size=UDim2.fromOffset(58,58)
+OpenButton.Position=UDim2.new(0,15,0.5,-29)
+OpenButton.BackgroundColor3=Color3.fromRGB(90,45,220)
+OpenButton.Text="R"
+OpenButton.TextColor3=Color3.new(1,1,1)
+OpenButton.TextSize=25
+OpenButton.Font=Enum.Font.GothamBold
+OpenButton.Visible=false
+OpenButton.Active=true
+OpenButton.Selectable=true
+OpenButton.Parent=Gui
+
+Instance.new("UICorner",OpenButton).CornerRadius=UDim.new(1,0)
+
+local OpenStroke=Instance.new("UIStroke")
+OpenStroke.Color=Color3.fromRGB(170,110,255)
+OpenStroke.Thickness=2
+OpenStroke.Parent=OpenButton
+
+Close.Activated:Connect(function()
+	Main.Visible=false
+	OpenButton.Visible=true
+end)
+
+OpenButton.Activated:Connect(function()
+	Main.Visible=true
+	OpenButton.Visible=false
+end)
+
+--========================================================
+-- DRAG
+--========================================================
+
+local Dragging=false
+local DragStart
+loc# Revek-v6
